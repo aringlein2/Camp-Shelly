@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold">{% if item %}Edit activity{% else %}Suggest an activity{% endif %}</h1>
+<form method="post" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
+  <label class="block">
+    <span class="text-sm font-medium">Activity name *</span>
+    <input name="title" required value="{{ item['title'] if item else '' }}"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Description</span>
+    <textarea name="description" rows="3" class="mt-1 w-full border border-stone-300 rounded px-3 py-2">{{ item['description'] if item else '' }}</textarea>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Best for</span>
+    <select name="age_group" class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
+      <option value=""></option>
+      {% for a in age_groups %}<option value="{{ a }}" {% if item and item['age_group'] == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Supplies needed</span>
+    <input name="supplies_needed" value="{{ item['supplies_needed'] if item else '' }}"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Preferred day / time</span>
+    <input name="preferred_time" value="{{ item['preferred_time'] if item else '' }}"
+           placeholder="Saturday morning"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="inline-flex items-center gap-2">
+    <input type="checkbox" name="willing_to_lead" {% if item and item['willing_to_lead'] %}checked{% endif %}>
+    <span class="text-sm">I'm willing to lead this</span>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Notes</span>
+    <textarea name="notes" rows="2" class="mt-1 w-full border border-stone-300 rounded px-3 py-2">{{ item['notes'] if item else '' }}</textarea>
+  </label>
+  <div class="flex gap-2">
+    <button class="bg-emerald-700 text-white px-4 py-2 rounded">Save</button>
+    <a href="{{ url_for('activities.index') }}" class="px-4 py-2">Cancel</a>
+  </div>
+</form>
+{% endblock %}

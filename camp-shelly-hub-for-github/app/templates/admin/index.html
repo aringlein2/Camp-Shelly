@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Admin · {{ trip.name }} Hub{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold">Admin</h1>
+<p class="text-sm text-stone-600 mt-1">Manage who can use the hub and keep things tidy.</p>
+
+<section class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+  {% for k, v in counts.items() %}
+    <div class="bg-white rounded shadow p-3">
+      <div class="text-xs text-stone-500 capitalize">{{ k }}</div>
+      <div class="text-xl font-semibold">{{ v }}</div>
+    </div>
+  {% endfor %}
+</section>
+
+<section class="mt-6 grid sm:grid-cols-2 gap-3">
+  <a href="{{ url_for('admin.participants') }}" class="block bg-white rounded shadow p-4">
+    <div class="font-semibold">People</div>
+    <div class="text-sm text-stone-600">Add or remove approved phone numbers, set roles, edit display names.</div>
+  </a>
+  <a href="{{ url_for('admin.households') }}" class="block bg-white rounded shadow p-4">
+    <div class="font-semibold">Households</div>
+    <div class="text-sm text-stone-600">Group people by household.</div>
+  </a>
+  <a href="{{ url_for('announcements.new') }}" class="block bg-white rounded shadow p-4">
+    <div class="font-semibold">Post announcement</div>
+    <div class="text-sm text-stone-600">Pinned reminders, weather alerts, schedule changes.</div>
+  </a>
+  <a href="{{ url_for('faq.new') }}" class="block bg-white rounded shadow p-4">
+    <div class="font-semibold">Add FAQ item</div>
+    <div class="text-sm text-stone-600">Turn answered questions into reusable FAQ.</div>
+  </a>
+</section>
+{% endblock %}

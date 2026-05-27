@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ trip.name }} Hub{% endblock %}
+{% block content %}
+
+<section class="bg-white rounded-xl shadow p-5">
+  <h1 class="text-2xl font-semibold text-emerald-800">{{ trip.name }}</h1>
+  <p class="text-stone-600 mt-1">{{ trip.dates }} · {{ trip.location }}</p>
+  <p class="mt-3">{{ trip.welcome }}</p>
+  <p class="mt-3 text-xs text-stone-500">
+    Quick reminder: this site is private to attendees. Please avoid posting kids' full names,
+    medical info, or detailed home-empty dates.
+  </p>
+</section>
+
+{% if pinned %}
+<section class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+  <div class="text-xs uppercase font-semibold text-amber-700">Pinned announcement</div>
+  <h2 class="text-lg font-semibold mt-1">{{ pinned['title'] }}</h2>
+  <div class="prose-simple mt-1 text-sm whitespace-pre-line">{{ pinned['body'] }}</div>
+</section>
+{% endif %}
+
+{% macro tile(href, label, count) %}
+  <a class="relative block bg-white rounded-lg p-4 shadow text-center font-medium hover:bg-emerald-50"
+     href="{{ href }}">
+    {{ label }}
+    {% if count and count > 0 %}
+      <span class="absolute -top-2 -right-2 min-w-[1.5rem] h-6 px-1.5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow"
+            aria-label="{{ count }} new">
+        {{ count if count < 100 else '99+' }}
+      </span>
+    {% endif %}
+  </a>
+{% endmacro %}
+
+<section class="mt-5">
+  <h2 class="text-lg font-semibold mb-2">Jump to</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    {{ tile(url_for('announcements.index'), 'Announcements', badges.get('announcements', 0)) }}
+    {{ tile(url_for('posts.index'), 'Discussions', badges.get('posts', 0)) }}
+    {{ tile(url_for('gear.index'), 'Gear Swap', badges.get('gear', 0)) }}
+    {{ tile(url_for('meals.index'), 'Meal Ideas', badges.get('meals', 0)) }}
+    {{ tile(url_for('rides.index'), 'Ride Share', badges.get('rides', 0)) }}
+    {{ tile(url_for('activities.index'), 'Activities', badges.get('activities', 0)) }}
+    {{ tile(url_for('packing.index'), 'Packing List', 0) }}
+    {{ tile(url_for('faq.index'), 'FAQ', badges.get('faq', 0)) }}
+    {{ tile(url_for('lost_found.index'), 'Lost & Found', badges.get('lost_found', 0)) }}
+  </div>
+</section>
+
+<section class="mt-6 grid sm:grid-cols-2 gap-4">
+  <div class="bg-white rounded-xl shadow p-4">
+    <h3 class="font-semibold mb-2">Latest announcements</h3>
+    {% if latest_announcements %}
+      <ul class="space-y-2 text-sm">
+        {% for a in latest_announcements %}
+          <li>
+            <div class="font-medium">{{ a['title'] }}</div>
+            <div class="text-stone-500 text-xs">{{ a['created_at'] }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('announcements.index') }}" class="text-sm text-emerald-700 underline mt-2 inline-block">See all →</a>
+    {% else %}
+      <p class="text-sm text-stone-500">No announcements yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl shadow p-4">
+    <h3 class="font-semibold mb-2">Latest discussion</h3>
+    {% if latest_posts %}
+      <ul class="space-y-2 text-sm">
+        {% for p in latest_posts %}
+          <li>
+            <a href="{{ url_for('posts.detail', post_id=p['id']) }}" class="font-medium text-emerald-700 underline">{{ p['title'] }}</a>
+            <div class="text-stone-500 text-xs">{{ p['category'] }} · {{ p['author_name'] or 'A camper' }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('posts.index') }}" class="text-sm text-emerald-700 underline mt-2 inline-block">See all →</a>
+    {% else %}
+      <p class="text-sm text-stone-500">No posts yet. <a href="{{ url_for('posts.new') }}" class="underline">Start one!</a></p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="mt-6 bg-white rounded-xl shadow p-4">
+  <h3 class="font-semibold mb-2">Useful links</h3>
+  <ul class="text-sm space-y-1">
+    {% if trip.weather_url %}<li>· <a class="text-emerald-700 underline" href="{{ trip.weather_url }}" target="_blank" rel="noreferrer">Weather forecast</a></li>{% endif %}
+    {% if trip.rules_url %}<li>· <a class="text-emerald-700 underline" href="{{ trip.rules_url }}" target="_blank" rel="noreferrer">Campground rules</a></li>{% endif %}
+    {% if trip.printable_url %}<li>· <a class="text-emerald-700 underline" href="{{ trip.printable_url }}" target="_blank" rel="noreferrer">Printable quick sheet</a></li>{% endif %}
+    <li>· <a class="text-emerald-700 underline" href="{{ url_for('packing.index') }}">Packing list (printable)</a></li>
+  </ul>
+</section>
+
+{% endblock %}

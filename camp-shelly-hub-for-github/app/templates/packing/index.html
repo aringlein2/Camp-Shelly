@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Packing List · {{ trip.name }} Hub{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Packing List</h1>
+  <button onclick="window.print()" class="bg-stone-800 text-white px-3 py-2 rounded text-sm no-print">Print</button>
+</div>
+<p class="text-sm text-stone-600 mt-1">Use this as a starting point. Skim and adapt to your household.</p>
+
+<section class="mt-5 bg-amber-50 border border-amber-200 rounded-xl p-4">
+  <h2 class="font-semibold">First-time camper basics</h2>
+  <p class="text-xs text-stone-600 mb-2">If you've never camped before, start here.</p>
+  <ul class="space-y-1 text-sm">
+    {% for item in first_timer %}
+      <li class="flex items-start gap-2"><span class="text-stone-400">☐</span> {{ item }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="mt-6 grid sm:grid-cols-2 gap-4">
+  {% for section, items in packing_list %}
+    <div class="bg-white rounded-xl shadow p-4 break-inside-avoid">
+      <h3 class="font-semibold text-emerald-800">{{ section }}</h3>
+      <ul class="mt-2 space-y-1 text-sm">
+        {% for item in items %}
+          <li class="flex items-start gap-2"><span class="text-stone-400">☐</span> {{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</section>
+{% endblock %}

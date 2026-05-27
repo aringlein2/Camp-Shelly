@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Meal Ideas · {{ trip.name }} Hub{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Meal Ideas</h1>
+  <a href="{{ url_for('meals.new') }}" class="bg-emerald-700 text-white px-3 py-2 rounded text-sm">+ Add idea</a>
+</div>
+
+<form method="get" class="mt-3 flex flex-wrap gap-2 text-sm">
+  <select name="meal_type" class="border border-stone-300 rounded px-2 py-1 bg-white">
+    <option value="">Any meal</option>
+    {% for m in meal_types %}<option value="{{ m }}" {% if m == meal_type %}selected{% endif %}>{{ m }}</option>{% endfor %}
+  </select>
+  <select name="diet" class="border border-stone-300 rounded px-2 py-1 bg-white">
+    <option value="">Any diet</option>
+    {% for d in dietary_tags %}<option value="{{ d }}" {% if d == diet %}selected{% endif %}>{{ d }}</option>{% endfor %}
+  </select>
+  <select name="cleanup" class="border border-stone-300 rounded px-2 py-1 bg-white">
+    <option value="">Any cleanup</option>
+    {% for c in cleanup_levels %}<option value="{{ c }}" {% if c == cleanup %}selected{% endif %}>{{ c }}</option>{% endfor %}
+  </select>
+  <input name="q" value="{{ q }}" placeholder="Search…" class="flex-1 border border-stone-300 rounded px-2 py-1">
+  <button class="bg-stone-800 text-white px-3 py-1 rounded">Filter</button>
+</form>
+
+{% if not items %}
+  <p class="text-stone-500 mt-4">No meal ideas yet. <a class="underline" href="{{ url_for('meals.new') }}">Share one →</a></p>
+{% endif %}
+
+<div class="mt-4 grid sm:grid-cols-2 gap-3">
+  {% for m in items %}
+    <a href="{{ url_for('meals.detail', item_id=m['id']) }}" class="block bg-white rounded-xl shadow p-4 hover:bg-emerald-50">
+      <div class="text-xs text-stone-500">{{ m['meal_type'] }}{% if m['serves'] %} · serves {{ m['serves'] }}{% endif %}</div>
+      <div class="font-semibold mt-1">{{ m['title'] }}</div>
+      {% if m['description'] %}<div class="text-sm mt-1 line-clamp-3">{{ m['description'][:140] }}{% if m['description']|length > 140 %}…{% endif %}</div>{% endif %}
+      <div class="mt-2 flex flex-wrap gap-1">
+        {% for t in (m['dietary_tags'] or '').split(',') if t %}
+          <span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">{{ t }}</span>
+        {% endfor %}
+        {% if m['cleanup_level'] %}
+          <span class="text-xs px-2 py-0.5 bg-stone-100 text-stone-700 rounded">Cleanup: {{ m['cleanup_level'] }}</span>
+        {% endif %}
+      </div>
+      <div class="text-xs text-stone-500 mt-2">From {{ m['author_name'] or 'a camper' }}</div>
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

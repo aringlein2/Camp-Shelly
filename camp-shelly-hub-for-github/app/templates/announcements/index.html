@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Announcements · {{ trip.name }} Hub{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Announcements</h1>
+  {% if current_user['role'] == 'admin' %}
+    <a href="{{ url_for('announcements.new') }}" class="bg-emerald-700 text-white px-3 py-2 rounded text-sm">+ New</a>
+  {% endif %}
+</div>
+
+{% if not items %}
+  <p class="text-stone-500 mt-4">No announcements yet.</p>
+{% endif %}
+
+<div class="mt-4 space-y-3">
+  {% for a in items %}
+    <article class="bg-white rounded-xl shadow p-4 {% if a['pinned'] %}border-l-4 border-amber-400{% endif %}">
+      <div class="flex items-start justify-between gap-2">
+        <h2 class="text-lg font-semibold">
+          {{ a['title'] }}
+          {% if a['priority'] == 'urgent' %}<span class="ml-1 text-xs bg-red-600 text-white px-2 py-0.5 rounded">URGENT</span>{% endif %}
+          {% if a['priority'] == 'important' %}<span class="ml-1 text-xs bg-amber-500 text-white px-2 py-0.5 rounded">Important</span>{% endif %}
+          {% if a['pinned'] %}<span class="ml-1 text-xs text-amber-700">📌 Pinned</span>{% endif %}
+        </h2>
+        {% if current_user['role'] == 'admin' %}
+          <div class="text-xs flex gap-2 no-print">
+            <a href="{{ url_for('announcements.edit', item_id=a['id']) }}" class="underline">Edit</a>
+            <form method="post" action="{{ url_for('announcements.delete', item_id=a['id']) }}" onsubmit="return confirm('Delete this announcement?');">
+              <button class="underline text-red-700">Delete</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+      <div class="text-xs text-stone-500 mt-1">
+        Posted by {{ a['author_name'] or 'Admin' }} · {{ a['created_at'] }}
+      </div>
+      <div class="prose-simple mt-2 whitespace-pre-line text-sm">{{ a['body'] }}</div>
+    </article>
+  {% endfor %}
+</div>
+{% endblock %}

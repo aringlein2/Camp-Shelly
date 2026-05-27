@@ -1,0 +1,45 @@
+{% macro text_field(name, label, value='', placeholder='', required=False, type='text') %}
+<label class="block">
+  <span class="text-sm font-medium text-stone-700">{{ label }}{% if required %} *{% endif %}</span>
+  <input type="{{ type }}" name="{{ name }}" value="{{ value or '' }}"
+         placeholder="{{ placeholder }}" {% if required %}required{% endif %}
+         class="mt-1 w-full border border-stone-300 rounded px-3 py-2 text-base">
+</label>
+{% endmacro %}
+
+{% macro textarea(name, label, value='', rows=4, placeholder='', required=False) %}
+<label class="block">
+  <span class="text-sm font-medium text-stone-700">{{ label }}{% if required %} *{% endif %}</span>
+  <textarea name="{{ name }}" rows="{{ rows }}" placeholder="{{ placeholder }}"
+            {% if required %}required{% endif %}
+            class="mt-1 w-full border border-stone-300 rounded px-3 py-2 text-base">{{ value or '' }}</textarea>
+</label>
+{% endmacro %}
+
+{% macro select_field(name, label, options, value='', required=False) %}
+<label class="block">
+  <span class="text-sm font-medium text-stone-700">{{ label }}{% if required %} *{% endif %}</span>
+  <select name="{{ name }}" {% if required %}required{% endif %}
+          class="mt-1 w-full border border-stone-300 rounded px-3 py-2 text-base bg-white">
+    <option value=""></option>
+    {% for opt in options %}
+      <option value="{{ opt }}" {% if value == opt %}selected{% endif %}>{{ opt }}</option>
+    {% endfor %}
+  </select>
+</label>
+{% endmacro %}
+
+{% macro checkbox_group(name, label, options, values=[]) %}
+<fieldset>
+  <legend class="text-sm font-medium text-stone-700">{{ label }}</legend>
+  <div class="mt-1 flex flex-wrap gap-2">
+    {% for opt in options %}
+      <label class="inline-flex items-center gap-1 px-2 py-1 border border-stone-300 rounded text-sm bg-white">
+        <input type="checkbox" name="{{ name }}" value="{{ opt }}"
+               {% if opt in values %}checked{% endif %}>
+        {{ opt }}
+      </label>
+    {% endfor %}
+  </div>
+</fieldset>
+{% endmacro %}

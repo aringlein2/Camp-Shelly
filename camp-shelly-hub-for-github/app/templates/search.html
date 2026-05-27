@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Search · {{ trip.name }} Hub{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold">Search</h1>
+<form method="get" class="mt-3 flex gap-2">
+  <input name="q" value="{{ q }}" placeholder="Search posts, gear, meals, FAQ, rides…"
+         class="flex-1 border border-stone-300 rounded px-3 py-2">
+  <button class="bg-emerald-700 text-white px-3 py-2 rounded">Search</button>
+</form>
+
+{% if q %}
+  <p class="text-sm text-stone-500 mt-2">{{ total }} result{{ '' if total == 1 else 's' }} for “{{ q }}”.</p>
+{% endif %}
+
+{% macro section(title, items, render) %}
+  {% if items %}
+    <section class="mt-5">
+      <h2 class="text-lg font-semibold">{{ title }}</h2>
+      <div class="mt-2 space-y-2">
+        {% for it in items %}{{ render(it) }}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endmacro %}
+
+{% if results.announcements %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Announcements</h2>
+  <div class="mt-2 space-y-2">
+    {% for a in results.announcements %}
+      <a href="{{ url_for('announcements.index') }}#a-{{ a['id'] }}" class="block bg-white rounded shadow p-3">
+        <div class="font-medium">{{ a['title'] }}</div>
+        <div class="text-sm text-stone-600 line-clamp-2">{{ a['body'][:140] }}{% if a['body']|length > 140 %}…{% endif %}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.posts %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Posts</h2>
+  <div class="mt-2 space-y-2">
+    {% for p in results.posts %}
+      <a href="{{ url_for('posts.detail', post_id=p['id']) }}" class="block bg-white rounded shadow p-3">
+        <div class="font-medium">{{ p['title'] }}</div>
+        <div class="text-xs text-stone-500">{{ p['category'] }}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.replies %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Replies</h2>
+  <div class="mt-2 space-y-2">
+    {% for r in results.replies %}
+      <a href="{{ url_for('posts.detail', post_id=r['post_id']) }}#r-{{ r['id'] }}" class="block bg-white rounded shadow p-3">
+        <div class="text-xs text-stone-500">on “{{ r['post_title'] }}”</div>
+        <div class="text-sm">{{ r['body'][:140] }}{% if r['body']|length > 140 %}…{% endif %}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.gear %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Gear</h2>
+  <div class="mt-2 space-y-2">
+    {% for g in results.gear %}
+      <a href="{{ url_for('gear.index') }}" class="block bg-white rounded shadow p-3">
+        <span class="text-xs px-2 py-0.5 rounded text-white {% if g['type'] == 'offering' %}bg-emerald-600{% else %}bg-sky-700{% endif %}">{{ 'Offering' if g['type'] == 'offering' else 'Looking for' }}</span>
+        <span class="font-medium ml-1">{{ g['item_name'] }}</span>
+        <div class="text-xs text-stone-500">{{ g['status']|replace('_', ' ') }}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.meals %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Meal ideas</h2>
+  <div class="mt-2 space-y-2">
+    {% for m in results.meals %}
+      <a href="{{ url_for('meals.detail', item_id=m['id']) }}" class="block bg-white rounded shadow p-3">
+        <div class="font-medium">{{ m['title'] }}</div>
+        <div class="text-xs text-stone-500">{{ m['meal_type'] }}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.rides %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Rides</h2>
+  <div class="mt-2 space-y-2">
+    {% for r in results.rides %}
+      <a href="{{ url_for('rides.index') }}" class="block bg-white rounded shadow p-3">
+        <span class="text-xs px-2 py-0.5 rounded text-white {% if r['type'] == 'offering' %}bg-emerald-600{% else %}bg-sky-700{% endif %}">{{ r['type']|capitalize }}</span>
+        <span class="ml-1">{{ r['leaving_from'] or 'Ride' }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.activities %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Activities</h2>
+  <div class="mt-2 space-y-2">
+    {% for a in results.activities %}
+      <a href="{{ url_for('activities.index') }}" class="block bg-white rounded shadow p-3">
+        <div class="font-medium">{{ a['title'] }}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.faq %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">FAQ</h2>
+  <div class="mt-2 space-y-2">
+    {% for f in results.faq %}
+      <a href="{{ url_for('faq.index') }}" class="block bg-white rounded shadow p-3">
+        <div class="font-medium">{{ f['question'] }}</div>
+        <div class="text-xs text-stone-500">{{ f['category'] }}</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if results.lost_found %}
+<section class="mt-5">
+  <h2 class="text-lg font-semibold">Lost &amp; Found</h2>
+  <div class="mt-2 space-y-2">
+    {% for l in results.lost_found %}
+      <a href="{{ url_for('lost_found.index') }}" class="block bg-white rounded shadow p-3">
+        <span class="text-xs px-2 py-0.5 rounded text-white {% if l['type'] == 'found' %}bg-emerald-600{% else %}bg-red-600{% endif %}">{{ l['type']|capitalize }}</span>
+        <span class="ml-1">{{ l['description'][:80] }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

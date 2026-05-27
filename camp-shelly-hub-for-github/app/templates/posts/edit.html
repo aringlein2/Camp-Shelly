@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold">{% if post %}Edit post{% else %}New post{% endif %}</h1>
+
+<form method="post" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
+  <label class="block">
+    <span class="text-sm font-medium">Title *</span>
+    <input name="title" required value="{{ post['title'] if post else '' }}"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Category *</span>
+    <select name="category" required class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
+      <option value=""></option>
+      {% for c in categories %}
+        <option value="{{ c }}" {% if post and post['category'] == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Body *</span>
+    <textarea name="body" rows="6" required
+              class="mt-1 w-full border border-stone-300 rounded px-3 py-2">{{ post['body'] if post else '' }}</textarea>
+  </label>
+
+  <fieldset>
+    <legend class="text-sm font-medium">Tags (optional)</legend>
+    <div class="mt-1 flex flex-wrap gap-2">
+      {% for t in tags_options %}
+        <label class="inline-flex items-center gap-1 px-2 py-1 border border-stone-300 rounded text-sm bg-white">
+          <input type="checkbox" name="tags" value="{{ t }}" {% if t in selected_tags %}checked{% endif %}>
+          {{ t }}
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <div class="flex gap-2">
+    <button class="bg-emerald-700 text-white px-4 py-2 rounded">Save</button>
+    <a href="{{ url_for('posts.index') }}" class="px-4 py-2">Cancel</a>
+  </div>
+</form>
+{% endblock %}

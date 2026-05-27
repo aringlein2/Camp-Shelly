@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Gear Swap · {{ trip.name }} Hub{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Gear Swap</h1>
+  <a href="{{ url_for('gear.new') }}" class="bg-emerald-700 text-white px-3 py-2 rounded text-sm">+ Add</a>
+</div>
+
+<form method="get" class="mt-3 flex flex-wrap gap-2 text-sm">
+  <select name="type" class="border border-stone-300 rounded px-2 py-1 bg-white">
+    <option value="">All</option>
+    <option value="offering" {% if type_filter == 'offering' %}selected{% endif %}>Offering</option>
+    <option value="looking" {% if type_filter == 'looking' %}selected{% endif %}>Looking for</option>
+  </select>
+  <select name="category" class="border border-stone-300 rounded px-2 py-1 bg-white">
+    <option value="">All categories</option>
+    {% for c in categories %}
+      <option value="{{ c }}" {% if c == cat %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  <input name="q" value="{{ q }}" placeholder="Search item…" class="flex-1 border border-stone-300 rounded px-2 py-1">
+  <button class="bg-stone-800 text-white px-3 py-1 rounded">Filter</button>
+</form>
+
+{% if not items %}
+  <p class="text-stone-500 mt-4">No gear items match. <a class="underline" href="{{ url_for('gear.new') }}">Add one →</a></p>
+{% endif %}
+
+<div class="mt-4 grid gap-3">
+  {% for g in items %}
+    <div class="bg-white rounded-xl shadow p-4 {% if g['status'] == 'resolved' %}opacity-60{% endif %}">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <div class="text-xs">
+            <span class="px-2 py-0.5 rounded text-white {% if g['type'] == 'offering' %}bg-emerald-600{% else %}bg-sky-700{% endif %}">
+              {{ 'Offering' if g['type'] == 'offering' else 'Looking for' }}
+            </span>
+            <span class="ml-1 text-stone-500">{{ g['category'] }}</span>
+          </div>
+          <div class="font-semibold mt-1">{{ g['item_name'] }}{% if g['quantity'] %} <span class="text-stone-500 text-sm">({{ g['quantity'] }})</span>{% endif %}</div>
+          {% if g['description'] %}<div class="text-sm mt-1 whitespace-pre-line">{{ g['description'] }}</div>{% endif %}
+          {% if g['pickup_return_notes'] %}<div class="text-xs text-stone-600 mt-1">Pickup/return: {{ g['pickup_return_notes'] }}</div>{% endif %}
+          {% if g['contact_preference'] %}<div class="text-xs text-stone-600 mt-1">Contact: {{ g['contact_preference'] }}</div>{% endif %}
+          <div class="text-xs text-stone-500 mt-2">From {{ g['author_name'] or 'a camper' }} · {{ g['created_at'] }}</div>
+        </div>
+        <div class="text-right text-xs">
+          <div class="font-medium">{{ status_labels[g['status']] }}</div>
+          {% if current_user['id'] == g['author_id'] or current_user['role'] == 'admin' %}
+            <form method="post" action="{{ url_for('gear.set_status', item_id=g['id']) }}" class="mt-1 no-print">
+              <select name="status" class="border rounded px-1 py-0.5 text-xs">
+                <option value="available" {% if g['status'] == 'available' %}selected{% endif %}>Available</option>
+                <option value="claimed" {% if g['status'] == 'claimed' %}selected{% endif %}>Claimed</option>
+                <option value="still_needed" {% if g['status'] == 'still_needed' %}selected{% endif %}>Still needed</option>
+                <option value="resolved" {% if g['status'] == 'resolved' %}selected{% endif %}>Resolved</option>
+              </select>
+              <button class="underline">Set</button>
+            </form>
+            <div class="mt-1 flex flex-col gap-1 no-print">
+              <a href="{{ url_for('gear.edit', item_id=g['id']) }}" class="underline">Edit</a>
+              <form method="post" action="{{ url_for('gear.delete', item_id=g['id']) }}" onsubmit="return confirm('Delete?');">
+                <button class="underline text-red-700">Delete</button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

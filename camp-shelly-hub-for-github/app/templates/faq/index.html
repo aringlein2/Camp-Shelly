@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}FAQ · {{ trip.name }} Hub{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">FAQ</h1>
+  {% if current_user['role'] == 'admin' %}
+    <a href="{{ url_for('faq.new') }}" class="bg-emerald-700 text-white px-3 py-2 rounded text-sm">+ Add Q&amp;A</a>
+  {% endif %}
+</div>
+
+{% if not grouped %}
+  <p class="text-stone-500 mt-4">No FAQ items yet.</p>
+{% endif %}
+
+{% for category, items in grouped %}
+  <section class="mt-5">
+    <h2 class="text-lg font-semibold text-emerald-800">{{ category }}</h2>
+    <div class="mt-2 space-y-2">
+      {% for it in items %}
+        <details class="bg-white rounded-lg shadow p-3">
+          <summary class="cursor-pointer font-medium">{{ it['question'] }}</summary>
+          <div class="mt-2 text-sm whitespace-pre-line">{{ it['answer'] }}</div>
+          {% if current_user['role'] == 'admin' %}
+            <div class="mt-2 flex gap-3 text-xs no-print">
+              <a href="{{ url_for('faq.edit', item_id=it['id']) }}" class="underline">Edit</a>
+              <form method="post" action="{{ url_for('faq.delete', item_id=it['id']) }}" onsubmit="return confirm('Delete?');">
+                <button class="underline text-red-700">Delete</button>
+              </form>
+            </div>
+          {% endif %}
+        </details>
+      {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+{% endblock %}

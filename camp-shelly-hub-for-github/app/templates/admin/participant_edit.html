@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold">{% if item %}Edit person{% else %}Add person{% endif %}</h1>
+<form method="post" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
+  <label class="block">
+    <span class="text-sm font-medium">Full name *</span>
+    <input name="name" required value="{{ item['name'] if item else '' }}"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Display name</span>
+    <input name="display_name" value="{{ item['display_name'] if item else '' }}"
+           placeholder="e.g. Angela R. or The Ringleins"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Phone {% if not item %}*{% endif %}</span>
+    {% if item %}
+      <input name="phone" placeholder="Leave blank to keep {{ item['phone_masked'] }}"
+             class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+    {% else %}
+      <input name="phone" required class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+    {% endif %}
+    <span class="text-xs text-stone-500">Stored normalized; never shown publicly.</span>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Household</span>
+    <select name="household_id" class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
+      <option value="">— none —</option>
+      {% for h in households %}
+        <option value="{{ h['id'] }}" {% if item and item['household_id'] == h['id'] %}selected{% endif %}>{{ h['household_name'] }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Role</span>
+    <select name="role" class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
+      <option value="participant" {% if item and item['role'] == 'participant' %}selected{% endif %}>Participant</option>
+      <option value="admin" {% if item and item['role'] == 'admin' %}selected{% endif %}>Admin</option>
+    </select>
+  </label>
+  <label class="inline-flex items-center gap-2">
+    <input type="checkbox" name="access_enabled" {% if not item or item['access_enabled'] %}checked{% endif %}>
+    <span class="text-sm">Access enabled</span>
+  </label>
+  <div class="flex gap-2">
+    <button class="bg-emerald-700 text-white px-4 py-2 rounded">Save</button>
+    <a href="{{ url_for('admin.participants') }}" class="px-4 py-2">Cancel</a>
+  </div>
+</form>
+{% endblock %}

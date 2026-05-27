@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-semibold">{% if item %}Edit gear item{% else %}Add gear item{% endif %}</h1>
+<form method="post" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
+  <label class="block">
+    <span class="text-sm font-medium">Type *</span>
+    <select name="type" required class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
+      <option value=""></option>
+      <option value="offering" {% if item and item['type'] == 'offering' %}selected{% endif %}>I'm offering this</option>
+      <option value="looking" {% if item and item['type'] == 'looking' %}selected{% endif %}>I'm looking for this</option>
+    </select>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Item name *</span>
+    <input name="item_name" required value="{{ item['item_name'] if item else '' }}"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Category</span>
+    <select name="category" class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
+      <option value=""></option>
+      {% for c in categories %}
+        <option value="{{ c }}" {% if item and item['category'] == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Quantity / size</span>
+    <input name="quantity" value="{{ item['quantity'] if item else '' }}"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Description</span>
+    <textarea name="description" rows="3" class="mt-1 w-full border border-stone-300 rounded px-3 py-2">{{ item['description'] if item else '' }}</textarea>
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Pickup / return notes</span>
+    <input name="pickup_return_notes" value="{{ item['pickup_return_notes'] if item else '' }}"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  <label class="block">
+    <span class="text-sm font-medium">Contact preference (optional)</span>
+    <input name="contact_preference" value="{{ item['contact_preference'] if item else '' }}"
+           placeholder="e.g. text me, or reply here"
+           class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+  </label>
+  {% if item %}
+  <label class="block">
+    <span class="text-sm font-medium">Status</span>
+    <select name="status" class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
+      {% for s in statuses %}
+        <option value="{{ s }}" {% if item['status'] == s %}selected{% endif %}>{{ s|replace('_', ' ')|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% endif %}
+  <div class="flex gap-2">
+    <button class="bg-emerald-700 text-white px-4 py-2 rounded">Save</button>
+    <a href="{{ url_for('gear.index') }}" class="px-4 py-2">Cancel</a>
+  </div>
+</form>
+{% endblock %}

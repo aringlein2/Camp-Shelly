@@ -1,0 +1,39 @@
+# Render.com one-click deploy config.
+# After pushing to GitHub, go to https://dashboard.render.com/blueprints,
+# click "New Blueprint Instance", and point it at this repo.
+
+services:
+  - type: web
+    name: camp-shelly-hub
+    runtime: python
+    plan: starter   # change to "free" if you want free tier (no persistent disk)
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT run:app
+    autoDeploy: true
+    disk:
+      name: camp-shelly-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true        # Render auto-generates a random secret
+      - key: ADMIN_PHONE
+        sync: false                # you'll set this in the Render UI
+      - key: ADMIN_NAME
+        value: Admin
+      - key: ADMIN_HOUSEHOLD
+        value: Admin Household
+      - key: CAMP_NAME
+        value: Camp Shelly
+      - key: CAMP_DATES
+        value: "Friday, August 14 – Sunday, August 16, 2026"
+      - key: CAMP_LOCATION
+        value: "Camp Shelly, South Lake Tahoe (Livermore Area Recreation & Parks)"
+      - key: CAMP_WELCOME
+        value: "Welcome, UUCiL friends! This is our private hub for coordinating Camp Shelly."
+      - key: WEATHER_URL
+        value: "https://forecast.weather.gov/MapClick.php?lat=38.94&lon=-119.97"
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.12.4"
