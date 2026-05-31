@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% from "partials/_photo_field.html" import photo_field %}
 {% block content %}
 <h1 class="text-2xl font-semibold">{% if item %}Edit ride{% else %}Add ride{% endif %}</h1>
-<form method="post" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
+<form method="post" enctype="multipart/form-data" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
   <label class="block">
     <span class="text-sm font-medium">Type *</span>
     <select name="type" required class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
@@ -12,22 +13,19 @@
   </label>
   <label class="block">
     <span class="text-sm font-medium">Leaving from</span>
-    <input name="leaving_from" value="{{ item['leaving_from'] if item else '' }}"
-           placeholder="e.g. Madison north side"
+    <input name="leaving_from" value="{{ item['leaving_from'] if item else '' }}" placeholder="e.g. Madison north side"
            class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
   </label>
   <div class="grid sm:grid-cols-2 gap-3">
     <label class="block">
       <span class="text-sm font-medium">Departure date/time</span>
       <input name="departure_datetime" value="{{ item['departure_datetime'] if item else '' }}"
-             placeholder="Friday around 2pm"
-             class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+             placeholder="Friday around 2pm" class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
     </label>
     <label class="block">
       <span class="text-sm font-medium">Return date/time</span>
       <input name="return_datetime" value="{{ item['return_datetime'] if item else '' }}"
-             placeholder="Sunday late afternoon"
-             class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+             placeholder="Sunday late afternoon" class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
     </label>
   </div>
   <div class="grid sm:grid-cols-2 gap-3">
@@ -39,8 +37,7 @@
     <label class="block">
       <span class="text-sm font-medium">Space for gear</span>
       <input name="gear_space" value="{{ item['gear_space'] if item else '' }}"
-             placeholder="some / a lot / minimal"
-             class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
+             placeholder="some / a lot / minimal" class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
     </label>
   </div>
   <label class="block">
@@ -60,6 +57,7 @@
     </select>
   </label>
   {% endif %}
+  {{ photo_field(item['image_path'] if item else None) }}
   <div class="flex gap-2">
     <button class="bg-emerald-700 text-white px-4 py-2 rounded">Save</button>
     <a href="{{ url_for('rides.index') }}" class="px-4 py-2">Cancel</a>

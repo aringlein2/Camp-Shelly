@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% from "partials/_photo_field.html" import photo_field %}
 {% block content %}
 <h1 class="text-2xl font-semibold">{% if item %}Edit meal idea{% else %}New meal idea{% endif %}</h1>
-<form method="post" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
+<form method="post" enctype="multipart/form-data" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
   <label class="block">
     <span class="text-sm font-medium">Meal name *</span>
     <input name="title" required value="{{ item['title'] if item else '' }}"
@@ -37,7 +38,6 @@
            placeholder="e.g. dutch oven, 2 pots, foil"
            class="mt-1 w-full border border-stone-300 rounded px-3 py-2">
   </label>
-
   <fieldset>
     <legend class="text-sm font-medium">Dietary</legend>
     <div class="mt-1 flex flex-wrap gap-2">
@@ -49,7 +49,6 @@
       {% endfor %}
     </div>
   </fieldset>
-
   <label class="block">
     <span class="text-sm font-medium">Cleanup level</span>
     <select name="cleanup_level" class="mt-1 w-full border border-stone-300 rounded px-3 py-2 bg-white">
@@ -57,7 +56,7 @@
       {% for c in cleanup_levels %}<option value="{{ c }}" {% if item and item['cleanup_level'] == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
     </select>
   </label>
-
+  {{ photo_field(item['image_path'] if item else None) }}
   <div class="flex gap-2">
     <button class="bg-emerald-700 text-white px-4 py-2 rounded">Save</button>
     <a href="{{ url_for('meals.index') }}" class="px-4 py-2">Cancel</a>

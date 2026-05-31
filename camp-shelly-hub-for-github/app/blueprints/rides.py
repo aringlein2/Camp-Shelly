@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, g, flash, abort
+from flask import Blueprint, render_template, request, redirect, url_for, g, flash, abort, current_app
 from .. import db
 from ..views_tracker import mark_viewed
+from ..images import save_resized, delete_image
 
 bp = Blueprint("rides", __name__, url_prefix="/rides")
 STATUSES = ["open", "filled", "resolved"]
@@ -10,6 +11,19 @@ def _can_edit(item, user):
     return user["role"] == "admin" or item["author_id"] == user["id"]
 
 
+def _form_photo(existing=None):
+    photo = request.files.get("photo")
+    try:
+        new_img = save_resized(photo, current_app.config["UPLOAD_DIR"])
+    except ValueError as e:
+        return existing, str(e)
+    if new_img:
+        if existing:
+            delete_image(existing, current_app.config["UPLOAD_DIR"])
+        return new_img, None
+    return existing, None
+
+
 @bp.route("/")
 def index():
     t = request.args.get("type", "")
@@ -17,8 +31,7 @@ def index():
              FROM ride_shares r LEFT JOIN participants p ON p.id = r.author_id WHERE 1=1"""
     args = []
     if t in ("offering", "looking"):
-        sql += " AND r.type = ?"
-        args.append(t)
+        sql += " AND r.type = ?"; args.append(t)
     sql += " ORDER BY r.status = 'resolved', r.departure_datetime IS NULL, r.departure_datetime ASC, r.created_at DESC"
     items = db.query(sql, tuple(args))
     if g.get("user"):
@@ -33,12 +46,17 @@ def new():
         if d["type"] not in ("offering", "looking"):
             flash("Please choose offering or looking.", "error")
             return render_template("rides/edit.html", item=None, statuses=STATUSES)
+        image_path, err = _form_photo(None)
+        if err:
+            flash(err, "error")
+            return render_template("rides/edit.html", item=None, statuses=STATUSES)
         db.execute(
             """INSERT INTO ride_shares (type, leaving_from, departure_datetime, return_datetime,
-                seats_available, gear_space, contact_preference, notes, author_id)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                seats_available, gear_space, contact_preference, notes, author_id, image_path)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (d["type"], d["leaving_from"], d["departure_datetime"], d["return_datetime"],
-             d["seats_available"], d["gear_space"], d["contact_preference"], d["notes"], g.user["id"]),
+             d["seats_available"], d["gear_space"], d["contact_preference"], d["notes"],
+             g.user["id"], image_path),
         )
         return redirect(url_for("rides.index"))
     return render_template("rides/edit.html", item=None, statuses=STATUSES)
@@ -54,12 +72,20 @@ def edit(item_id):
     if request.method == "POST":
         d = _form()
         status = request.form.get("status", item["status"])
+        image_path, err = _form_photo(item["image_path"])
+        if err:
+            flash(err, "error")
+            return render_template("rides/edit.html", item=item, statuses=STATUSES)
+        if request.form.get("remove_photo") and image_path:
+            delete_image(image_path, current_app.config["UPLOAD_DIR"])
+            image_path = None
         db.execute(
             """UPDATE ride_shares SET type=?, leaving_from=?, departure_datetime=?, return_datetime=?,
                 seats_available=?, gear_space=?, contact_preference=?, notes=?, status=?,
-                updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+                image_path=?, updated_at=CURRENT_TIMESTAMP WHERE id=?""",
             (d["type"], d["leaving_from"], d["departure_datetime"], d["return_datetime"],
-             d["seats_available"], d["gear_space"], d["contact_preference"], d["notes"], status, item_id),
+             d["seats_available"], d["gear_space"], d["contact_preference"], d["notes"],
+             status, image_path, item_id),
         )
         return redirect(url_for("rides.index"))
     return render_template("rides/edit.html", item=item, statuses=STATUSES)
@@ -72,6 +98,8 @@ def delete(item_id):
         abort(404)
     if not _can_edit(item, g.user):
         abort(403)
+    if item["image_path"]:
+        delete_image(item["image_path"], current_app.config["UPLOAD_DIR"])
     db.execute("DELETE FROM ride_shares WHERE id = ?", (item_id,))
     return redirect(url_for("rides.index"))
 

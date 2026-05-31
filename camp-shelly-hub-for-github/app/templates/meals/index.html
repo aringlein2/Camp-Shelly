@@ -31,8 +31,12 @@
   {% for m in items %}
     <a href="{{ url_for('meals.detail', item_id=m['id']) }}" class="block bg-white rounded-xl shadow p-4 hover:bg-emerald-50">
       <div class="text-xs text-stone-500">{{ m['meal_type'] }}{% if m['serves'] %} · serves {{ m['serves'] }}{% endif %}</div>
-      <div class="font-semibold mt-1">{{ m['title'] }}</div>
-      {% if m['description'] %}<div class="text-sm mt-1 line-clamp-3">{{ m['description'][:140] }}{% if m['description']|length > 140 %}…{% endif %}</div>{% endif %}
+      <div class="font-semibold mt-1">{{ m['title'] }}{% if m['image_path'] %} <span title="Has photo">📷</span>{% endif %}</div>
+      {% if m['image_path'] %}
+        <img src="{{ url_for('uploads', filename=m['image_path']) }}" alt=""
+             class="mt-2 max-h-32 w-full object-cover rounded border border-stone-200">
+      {% endif %}
+      {% if m['description'] %}<div class="text-sm mt-1">{{ m['description'][:140] }}{% if m['description']|length > 140 %}…{% endif %}</div>{% endif %}
       <div class="mt-2 flex flex-wrap gap-1">
         {% for t in (m['dietary_tags'] or '').split(',') if t %}
           <span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">{{ t }}</span>

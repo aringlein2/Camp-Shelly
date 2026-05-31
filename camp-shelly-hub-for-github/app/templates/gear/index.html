@@ -30,7 +30,7 @@
   {% for g in items %}
     <div class="bg-white rounded-xl shadow p-4 {% if g['status'] == 'resolved' %}opacity-60{% endif %}">
       <div class="flex items-start justify-between gap-2">
-        <div>
+        <div class="flex-1">
           <div class="text-xs">
             <span class="px-2 py-0.5 rounded text-white {% if g['type'] == 'offering' %}bg-emerald-600{% else %}bg-sky-700{% endif %}">
               {{ 'Offering' if g['type'] == 'offering' else 'Looking for' }}
@@ -38,6 +38,12 @@
             <span class="ml-1 text-stone-500">{{ g['category'] }}</span>
           </div>
           <div class="font-semibold mt-1">{{ g['item_name'] }}{% if g['quantity'] %} <span class="text-stone-500 text-sm">({{ g['quantity'] }})</span>{% endif %}</div>
+          {% if g['image_path'] %}
+            <a href="{{ url_for('uploads', filename=g['image_path']) }}" target="_blank" rel="noreferrer">
+              <img src="{{ url_for('uploads', filename=g['image_path']) }}" alt=""
+                   class="mt-2 max-h-48 rounded border border-stone-200">
+            </a>
+          {% endif %}
           {% if g['description'] %}<div class="text-sm mt-1 whitespace-pre-line">{{ g['description'] }}</div>{% endif %}
           {% if g['pickup_return_notes'] %}<div class="text-xs text-stone-600 mt-1">Pickup/return: {{ g['pickup_return_notes'] }}</div>{% endif %}
           {% if g['contact_preference'] %}<div class="text-xs text-stone-600 mt-1">Contact: {{ g['contact_preference'] }}</div>{% endif %}

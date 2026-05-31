@@ -34,6 +34,12 @@
       <div class="text-xs text-stone-500 mt-1">
         Posted by {{ a['author_name'] or 'Admin' }} · {{ a['created_at'] }}
       </div>
+      {% if a['image_path'] %}
+        <a href="{{ url_for('uploads', filename=a['image_path']) }}" target="_blank" rel="noreferrer">
+          <img src="{{ url_for('uploads', filename=a['image_path']) }}" alt=""
+               class="mt-3 max-w-full rounded border border-stone-200">
+        </a>
+      {% endif %}
       <div class="prose-simple mt-2 whitespace-pre-line text-sm">{{ a['body'] }}</div>
     </article>
   {% endfor %}

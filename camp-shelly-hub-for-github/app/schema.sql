@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS announcements (
     priority TEXT NOT NULL DEFAULT 'normal',
     pinned INTEGER NOT NULL DEFAULT 0,
     created_by INTEGER REFERENCES participants(id) ON DELETE SET NULL,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -66,6 +67,7 @@ CREATE TABLE IF NOT EXISTS gear_items (
     contact_preference TEXT,
     status TEXT NOT NULL DEFAULT 'available',
     author_id INTEGER REFERENCES participants(id) ON DELETE SET NULL,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -82,6 +84,7 @@ CREATE TABLE IF NOT EXISTS meal_ideas (
     dietary_tags TEXT,
     cleanup_level TEXT,
     author_id INTEGER REFERENCES participants(id) ON DELETE SET NULL,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -98,6 +101,7 @@ CREATE TABLE IF NOT EXISTS ride_shares (
     notes TEXT,
     status TEXT NOT NULL DEFAULT 'open',
     author_id INTEGER REFERENCES participants(id) ON DELETE SET NULL,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -112,6 +116,7 @@ CREATE TABLE IF NOT EXISTS activities (
     preferred_time TEXT,
     notes TEXT,
     author_id INTEGER REFERENCES participants(id) ON DELETE SET NULL,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );

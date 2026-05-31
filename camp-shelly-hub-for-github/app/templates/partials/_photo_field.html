@@ -1,0 +1,20 @@
+{% macro photo_field(existing_path) %}
+  <div>
+    <span class="text-sm font-medium">Photo (optional)</span>
+    {% if existing_path %}
+      <div class="mt-2 mb-2">
+        <img src="{{ url_for('uploads', filename=existing_path) }}" alt=""
+             class="max-h-40 rounded border border-stone-200">
+        <label class="inline-flex items-center gap-1 mt-2 text-xs">
+          <input type="checkbox" name="remove_photo">
+          Remove this photo
+        </label>
+      </div>
+    {% endif %}
+    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+           class="mt-1 block text-sm">
+    <p class="text-xs text-stone-500 mt-1">
+      JPG, PNG, or WebP. Max 5 MB. Big photos are auto-resized.
+    </p>
+  </div>
+{% endmacro %}

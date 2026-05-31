@@ -5,6 +5,12 @@
 <article class="mt-3 bg-white rounded-xl shadow p-4">
   <div class="text-xs text-stone-500">{{ item['meal_type'] }}{% if item['serves'] %} · serves {{ item['serves'] }}{% endif %}</div>
   <h1 class="text-2xl font-semibold mt-1">{{ item['title'] }}</h1>
+  {% if item['image_path'] %}
+    <a href="{{ url_for('uploads', filename=item['image_path']) }}" target="_blank" rel="noreferrer">
+      <img src="{{ url_for('uploads', filename=item['image_path']) }}" alt=""
+           class="mt-3 max-w-full rounded border border-stone-200">
+    </a>
+  {% endif %}
   <div class="mt-2 flex flex-wrap gap-1">
     {% for t in (item['dietary_tags'] or '').split(',') if t %}
       <span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">{{ t }}</span>

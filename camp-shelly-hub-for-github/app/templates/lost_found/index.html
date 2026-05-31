@@ -15,9 +15,7 @@
   <button class="bg-stone-800 text-white px-3 py-1 rounded">Filter</button>
 </form>
 
-{% if not items %}
-  <p class="text-stone-500 mt-4">Nothing posted yet.</p>
-{% endif %}
+{% if not items %}<p class="text-stone-500 mt-4">Nothing posted yet.</p>{% endif %}
 
 <div class="mt-4 grid gap-3">
   {% for l in items %}
@@ -28,6 +26,12 @@
         </span>
         <span class="ml-1 text-stone-500 capitalize">{{ l['status'] }}</span>
       </div>
+      {% if l['photo_url'] %}
+        <a href="{{ url_for('uploads', filename=l['photo_url']) }}" target="_blank" rel="noreferrer">
+          <img src="{{ url_for('uploads', filename=l['photo_url']) }}" alt=""
+               class="mt-2 max-h-48 rounded border border-stone-200">
+        </a>
+      {% endif %}
       <div class="mt-1 whitespace-pre-line">{{ l['description'] }}</div>
       {% if l['contact_preference'] %}<div class="text-xs text-stone-600 mt-1">Contact: {{ l['contact_preference'] }}</div>{% endif %}
       <div class="text-xs text-stone-500 mt-2">From {{ l['author_name'] or 'a camper' }} · {{ l['created_at'] }}</div>
