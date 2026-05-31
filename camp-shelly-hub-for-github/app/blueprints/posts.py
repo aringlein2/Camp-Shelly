@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, g, flash, abort
+from flask import Blueprint, render_template, request, redirect, url_for, g, flash, abort, current_app
 from .. import db
 from ..utils import POST_CATEGORIES, POST_TAGS
 from ..views_tracker import mark_viewed
+from ..images import save_resized, delete_image
 
 bp = Blueprint("posts", __name__, url_prefix="/posts")
 
@@ -54,10 +55,22 @@ def new():
                 categories=POST_CATEGORIES, tags_options=POST_TAGS,
                 selected_tags=request.form.getlist("tags"),
             )
+        # Handle photo upload
+        image_path = None
+        photo = request.files.get("photo")
+        try:
+            image_path = save_resized(photo, current_app.config["UPLOAD_DIR"])
+        except ValueError as e:
+            flash(str(e), "error")
+            return render_template(
+                "posts/edit.html", post=None,
+                categories=POST_CATEGORIES, tags_options=POST_TAGS,
+                selected_tags=request.form.getlist("tags"),
+            )
         new_id = db.execute(
-            """INSERT INTO posts (title, body, category, tags, author_id)
-               VALUES (?, ?, ?, ?, ?)""",
-            (title, body, category, tags, g.user["id"]),
+            """INSERT INTO posts (title, body, category, tags, author_id, image_path)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (title, body, category, tags, g.user["id"], image_path),
         )
         return redirect(url_for("posts.detail", post_id=new_id))
     return render_template(
@@ -97,10 +110,34 @@ def edit(post_id):
         body = request.form.get("body", "").strip()
         category = request.form.get("category", "").strip()
         tags = ",".join(request.form.getlist("tags"))
+
+        # Photo upload (replaces any existing)
+        image_path = post["image_path"]
+        photo = request.files.get("photo")
+        try:
+            new_img = save_resized(photo, current_app.config["UPLOAD_DIR"])
+            if new_img:
+                if image_path:
+                    delete_image(image_path, current_app.config["UPLOAD_DIR"])
+                image_path = new_img
+        except ValueError as e:
+            flash(str(e), "error")
+            selected_tags = post["tags"].split(",") if post["tags"] else []
+            return render_template(
+                "posts/edit.html", post=post,
+                categories=POST_CATEGORIES, tags_options=POST_TAGS,
+                selected_tags=selected_tags,
+            )
+
+        # Optional remove-existing
+        if request.form.get("remove_photo") and image_path:
+            delete_image(image_path, current_app.config["UPLOAD_DIR"])
+            image_path = None
+
         db.execute(
-            """UPDATE posts SET title=?, body=?, category=?, tags=?, updated_at=CURRENT_TIMESTAMP
-               WHERE id=?""",
-            (title, body, category, tags, post_id),
+            """UPDATE posts SET title=?, body=?, category=?, tags=?, image_path=?,
+               updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+            (title, body, category, tags, image_path, post_id),
         )
         return redirect(url_for("posts.detail", post_id=post_id))
     selected_tags = post["tags"].split(",") if post["tags"] else []
@@ -117,6 +154,8 @@ def delete(post_id):
         abort(404)
     if not _can_edit_post(post, g.user):
         abort(403)
+    if post["image_path"]:
+        delete_image(post["image_path"], current_app.config["UPLOAD_DIR"])
     db.execute("DELETE FROM posts WHERE id = ?", (post_id,))
     flash("Post deleted.", "success")
     return redirect(url_for("posts.index"))

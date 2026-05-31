@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS posts (
     author_id INTEGER REFERENCES participants(id) ON DELETE SET NULL,
     status TEXT NOT NULL DEFAULT 'open',
     pinned INTEGER NOT NULL DEFAULT 0,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );

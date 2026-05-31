@@ -33,6 +33,7 @@
         <div>
           <div class="font-semibold">
             {% if p['pinned'] %}📌 {% endif %}{{ p['title'] }}
+            {% if p['image_path'] %}<span title="Has photo">📷</span>{% endif %}
           </div>
           <div class="text-xs text-stone-500 mt-1">
             {{ p['category'] }} · {{ p['author_name'] or 'A camper' }} · {{ p['created_at'] }}

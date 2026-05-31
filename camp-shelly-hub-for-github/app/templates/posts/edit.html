@@ -2,7 +2,7 @@
 {% block content %}
 <h1 class="text-2xl font-semibold">{% if post %}Edit post{% else %}New post{% endif %}</h1>
 
-<form method="post" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
+<form method="post" enctype="multipart/form-data" class="mt-4 space-y-3 bg-white p-4 rounded-xl shadow">
   <label class="block">
     <span class="text-sm font-medium">Title *</span>
     <input name="title" required value="{{ post['title'] if post else '' }}"
@@ -34,6 +34,25 @@
       {% endfor %}
     </div>
   </fieldset>
+
+  <div>
+    <span class="text-sm font-medium">Photo (optional)</span>
+    {% if post and post['image_path'] %}
+      <div class="mt-2 mb-2">
+        <img src="{{ url_for('uploads', filename=post['image_path']) }}"
+             alt="" class="max-h-40 rounded border border-stone-200">
+        <label class="inline-flex items-center gap-1 mt-2 text-xs">
+          <input type="checkbox" name="remove_photo">
+          Remove this photo
+        </label>
+      </div>
+    {% endif %}
+    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+           class="mt-1 block text-sm">
+    <p class="text-xs text-stone-500 mt-1">
+      JPG, PNG, or WebP. Max 5 MB. Big photos are auto-resized to 1200px wide.
+    </p>
+  </div>
 
   <div class="flex gap-2">
     <button class="bg-emerald-700 text-white px-4 py-2 rounded">Save</button>

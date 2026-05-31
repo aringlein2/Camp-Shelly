@@ -25,7 +25,17 @@ def init_db():
     schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
     with open(schema_path, "r") as f:
         db.executescript(f.read())
+    # Migrations for columns added after first deploy.
+    _maybe_add_column(db, "posts", "image_path", "TEXT")
     db.commit()
+
+
+def _maybe_add_column(db, table, column, coltype):
+    """Add a column if it doesn't already exist on an existing table."""
+    cols = db.execute(f"PRAGMA table_info({table})").fetchall()
+    names = {row[1] for row in cols}
+    if column not in names:
+        db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
 
 
 def init_app(app):

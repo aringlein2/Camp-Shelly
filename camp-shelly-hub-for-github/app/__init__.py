@@ -1,6 +1,7 @@
 """Camp Shelly Hub — Flask app factory."""
 import os
-from flask import Flask, g, redirect, url_for, request
+import re
+from flask import Flask, g, redirect, url_for, request, send_from_directory, abort
 
 from . import db
 from .auth import current_user
@@ -23,15 +24,21 @@ from .blueprints import (
 
 def create_app():
     app = Flask(__name__, instance_relative_config=False)
+
+    data_dir = os.environ.get(
+        "DATABASE_PATH",
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "camp_shelly.db"),
+    )
+    upload_dir = os.path.join(os.path.dirname(data_dir), "uploads")
+    os.makedirs(upload_dir, exist_ok=True)
+
     app.config.update(
         SECRET_KEY=os.environ.get("SECRET_KEY", "dev-secret-change-me"),
-        DATABASE=os.environ.get(
-            "DATABASE_PATH",
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "camp_shelly.db"),
-        ),
+        DATABASE=data_dir,
+        UPLOAD_DIR=upload_dir,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
-        MAX_CONTENT_LENGTH=2 * 1024 * 1024,  # 2 MB upload cap (small)
+        MAX_CONTENT_LENGTH=5 * 1024 * 1024,  # 5 MB upload cap
         TRIP_INFO={
             "name": os.environ.get("CAMP_NAME", "Camp Shelly"),
             "dates": os.environ.get("CAMP_DATES", "Trip dates TBD"),
@@ -48,7 +55,6 @@ def create_app():
 
     db.init_app(app)
 
-    # Register blueprints
     app.register_blueprint(access.bp)
     app.register_blueprint(dashboard.bp)
     app.register_blueprint(announcements.bp)
@@ -66,7 +72,6 @@ def create_app():
     @app.before_request
     def load_user():
         g.user = current_user()
-        # Gate everything except /access and static files
         if not g.user:
             if request.endpoint and (
                 request.endpoint.startswith("access.")
@@ -87,7 +92,14 @@ def create_app():
     def robots():
         return ("User-agent: *\nDisallow: /\n", 200, {"Content-Type": "text/plain"})
 
-    # Ensure DB and seed on first run
+    # Serve uploaded images (login-gated by the global before_request hook above)
+    @app.route("/uploads/<path:filename>")
+    def uploads(filename):
+        # only allow safe filenames (no slashes, dots-dot)
+        if not re.fullmatch(r"[A-Za-z0-9_\-]+\.(jpg|jpeg|png|webp)", filename):
+            abort(404)
+        return send_from_directory(app.config["UPLOAD_DIR"], filename)
+
     with app.app_context():
         db.init_db()
         from .seed import seed_initial_data
