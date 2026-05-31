@@ -6,6 +6,7 @@ services:
   - type: web
     name: camp-shelly-hub
     runtime: python
+    rootDir: camp-shelly-hub-for-github
     plan: starter   # change to "free" if you want free tier (no persistent disk)
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT run:app
